@@ -1,0 +1,6 @@
+{
+    "text:utf8":["txt"],
+    "text:gem":["gmi"],
+    "text:ascii":["atxt","ascii"],
+    "srv:redir":["redir","rdir"]
+}

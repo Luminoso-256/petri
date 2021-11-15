@@ -12,9 +12,12 @@ import (
 	"strings"
 )
 
-var config Config
+var (
+	config   Config
+	ftconfig FiletypeConfig
+)
 
-const version = "Petri 1.0.2"
+const version = "Petri 1.1.0"
 
 func handleConnection(c net.Conn) {
 	fmt.Printf("Connection Made\n")
@@ -85,22 +88,17 @@ func handleConnection(c net.Conn) {
 			c.Write([]byte{0x23, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0})
 		}
 		var response []byte
-		switch strings.Split(path, ".")[len(strings.Split(path, "."))-1] {
-		case "txt":
+		ext := strings.Split(path, ".")[len(strings.Split(path, "."))-1]
+		if contains(ftconfig.TextUtf8, ext) {
 			response = append(response, 0x00)
-			break
-		case "gmi":
-			response = append(response, 0x01)
-			break
-		case "ascii":
+		} else if contains(ftconfig.TextASCII, ext) {
 			response = append(response, 0x02)
-			break
-		case "redir":
+		} else if contains(ftconfig.TextGem, ext) {
+			response = append(response, 0x01)
+		} else if contains(ftconfig.SrvRedir, ext) {
 			response = append(response, 0x20)
-			break
-		default:
+		} else {
 			response = append(response, 0x10)
-			break
 		}
 		lenb := make([]byte, 8)
 		binary.LittleEndian.PutUint64(lenb, uint64(len(datab)))
@@ -115,6 +113,8 @@ func main() {
 	fmt.Println("Petri: The fast, simple, and flexible Piper Webserver")
 	datab, _ := ioutil.ReadFile("data/config.json")
 	json.Unmarshal(datab, &config)
+	datab, _ = ioutil.ReadFile("data/filetypes.json")
+	json.Unmarshal(datab, &ftconfig)
 	l, err := net.Listen("tcp4", fmt.Sprintf(":%v", (config.Port)))
 	if err != nil {
 		fmt.Println(err)
