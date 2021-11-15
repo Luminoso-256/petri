@@ -13,7 +13,7 @@ import (
 
 var config Config
 
-const version = "Petri 1.0.0"
+const version = "Petri 1.0.1"
 
 func handleConnection(c net.Conn) {
 	fmt.Printf("Connection Made\n")
@@ -61,7 +61,7 @@ func handleConnection(c net.Conn) {
 			}
 			output := "Directory Listing of " + path + "\n"
 			for _, f := range files {
-				output += "=> piper://" + config.Hostname + path + "/" + f.Name() + " " + f.Name() + "\n"
+				output += "=> piper://" + config.Hostname + path + f.Name() + " " + f.Name() + "\n"
 			}
 			output += "> " + version + "\n"
 			var response []byte
