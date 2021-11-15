@@ -1,0 +1,5 @@
+{
+    "port":60,
+    "listdirectories":true,
+    "hostname":"localhost"
+}
