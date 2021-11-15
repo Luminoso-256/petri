@@ -33,7 +33,6 @@ func handleConnection(c net.Conn) {
 			buf := bytes.NewBuffer(clb)
 			binary.Read(buf, binary.LittleEndian, &clen)
 			gotclen = true
-			fmt.Printf("Clen = %v", clen)
 		}
 		//if the len of our byte array = the content len, it's time to stop recieving
 		if (len(requestBytes) >= int(clen)+2) && gotclen {
@@ -95,6 +94,9 @@ func handleConnection(c net.Conn) {
 			break
 		case "ascii":
 			response = append(response, 0x02)
+			break
+		case "redir":
+			response = append(response, 0x20)
 			break
 		default:
 			response = append(response, 0x10)
