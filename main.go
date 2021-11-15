@@ -13,7 +13,7 @@ import (
 
 var config Config
 
-const version = "Petri 1.0.1"
+const version = "Petri 1.0.2"
 
 func handleConnection(c net.Conn) {
 	fmt.Printf("Connection Made\n")
@@ -28,7 +28,7 @@ func handleConnection(c net.Conn) {
 		bytes = append(bytes, b)
 		//read our "header" so we know when to stop
 		if len(bytes) >= 2 && !gotclen {
-			clen = uint16(bytes[0])<<8 | uint16(bytes[1])
+			clen = uint16(bytes[1]) | uint16(bytes[0])<<8
 			gotclen = true
 		}
 		//if the len of our byte array = the content len, it's time to stop recieving
