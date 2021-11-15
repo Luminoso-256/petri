@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -17,7 +18,7 @@ const version = "Petri 1.0.2"
 
 func handleConnection(c net.Conn) {
 	fmt.Printf("Connection Made\n")
-	var bytes []byte
+	var requestBytes []byte
 	var clen uint16
 	path := ""
 	clen = 0
@@ -25,19 +26,22 @@ func handleConnection(c net.Conn) {
 	reader := bufio.NewReader(c)
 	for {
 		b, _ := reader.ReadByte()
-		bytes = append(bytes, b)
+		requestBytes = append(requestBytes, b)
 		//read our "header" so we know when to stop
-		if len(bytes) >= 2 && !gotclen {
-			clen = uint16(bytes[1]) | uint16(bytes[0])<<8
+		if len(requestBytes) >= 2 && !gotclen {
+			clb := requestBytes[:2]
+			buf := bytes.NewBuffer(clb)
+			binary.Read(buf, binary.LittleEndian, &clen)
 			gotclen = true
+			fmt.Printf("Clen = %v", clen)
 		}
 		//if the len of our byte array = the content len, it's time to stop recieving
-		if (len(bytes) >= int(clen)+2) && gotclen {
+		if (len(requestBytes) >= int(clen)+2) && gotclen {
 			break
 		}
 	}
-	path = string(bytes[2:])
-	fmt.Printf("Request recieved for path %s (total bytes read: %v / content len: %v) \n", path, len(bytes), clen)
+	path = string(requestBytes[2:])
+	fmt.Printf("Request recieved for path %s (total bytes read: %v / content len: %v) \n", path, len(requestBytes), clen)
 	if strings.Contains(path, "..") {
 		fmt.Println("Request contains .. - closing prematurely due to assumed security breach attempt")
 		c.Close()
