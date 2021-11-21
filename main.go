@@ -98,6 +98,13 @@ func handleConnection(c net.Conn) {
 		} else if contains(ftconfig.SrvRedir, ext) {
 			response = append(response, 0x20)
 		} else {
+			// are we sure we aren't being tricked?
+			if strings.HasSuffix(path, ".") {
+				//no.
+				c.Write([]byte{0x22, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0})
+				c.Close()
+				return
+			}
 			response = append(response, 0x10)
 		}
 		lenb := make([]byte, 8)
